@@ -1,0 +1,17 @@
+table {
+  width: 100%;               
+  border-collapse: collapse; 
+  margin-top: 20px;
+  font-family: Arial, sans-serif;
+}
+
+thead {
+  background-color: #343a40; 
+  color: white;
+}
+
+th, td {
+  padding: 10px 15px;
+  text-align: left;
+  border: 1px solid #ddd;   
+}
