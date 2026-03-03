@@ -37,7 +37,7 @@ window.submit=function () {
     alert("Invalid URL!");
     return false;
   }
-    let timeStamp = new Date().toLocaleString()
+    let timeStamp = Date.now();
     let likes=0;
     let bookmark = new Book(title.value, url.value, description.value, timeStamp, likes);
     bookList.push(bookmark);
