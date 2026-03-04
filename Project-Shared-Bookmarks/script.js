@@ -19,7 +19,7 @@ function userIdSelect(users) {
   users.forEach((id, index) => {
     optionUserId = document.createElement("option");
     document.querySelectorAll("option")[index].classList.add("userOption");
-    optionUserId.textContent = id;
+    optionUserId.textContent = `User ${id}`;
     optionUserId.value = id;
     selectUsers.append(optionUserId);
   });
@@ -36,7 +36,7 @@ function bookmarkSelector() {
 
     let bookmarkData;
     try {
-      bookmarkData = getData(event.target.value); // Getting data from localStorage for the user with selected user ID (captured in change event)
+      bookmarkData = getData(event.target.value) || []; // Getting data from localStorage for the user with selected user ID (captured in change event)
 
       bookmarkData.sort((a, b) => b.timestamp - a.timestamp); //Sorting All bookmarks in reverse chronological order
 
@@ -47,18 +47,22 @@ function bookmarkSelector() {
           "title",
           "description",
           "timestamp",
-          "likes",
         ];
 
         // checking if all fields in the obj of the user have right data
         let isValidObj = requiredFields.every(
           (field) =>
-            obj[field] != undefined && obj[field] != null && obj[field] != "",
-        );
+            obj[field] !== undefined && obj[field] != null && obj[field] !== "",
+        ) && obj.likes !== undefined;
 
         //returning true / false based on if the fields have the right data in the obj. If true, obj remains in bookMarkData else removed.
         return isValidObj;
       });
+      // Show empty state message if no valid bookmarks
+      if (bookmarkData.length === 0) {
+        bookmarkCard.textContent = "This user has no bookmarks";
+        return;
+      }
 
       //Time to display All valid bookmarks of the user
       for (let i = 0; i < bookmarkData.length; i++) {
@@ -120,7 +124,7 @@ const title = document.getElementById("title");
 const url = document.getElementById("url");
 const description = document.getElementById("description");
 
-window.submit = function () {
+function addBookmark() {
   if (
     title.value == null ||
     url.value == "" ||
@@ -163,7 +167,7 @@ window.submit = function () {
       .getElementById("user-select")
       .dispatchEvent(new Event("change"));
   }
-};
+}
 
 function Book(titleVal, urlVal, descriptionVal) {
   this.id = crypto.randomUUID();          // needed for likes
@@ -179,4 +183,5 @@ window.onload = function () {
   const users = getUserIds();
   userIdSelect(users);
   bookmarkSelector();
+  document.getElementById("submit-btn").addEventListener("click", addBookmark);
 };
