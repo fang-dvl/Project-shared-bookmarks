@@ -5,6 +5,10 @@
 // You can't open the index.html file using a file:// URL.
 
 import { clearData, getData, getUserIds, setData } from "./storage.js";
+import { incrementLikes } from "./likes.js";
+import { copyToClipboard } from "./clipboard.js";
+
+let currentUser = null;
 
 function userIdSelect(users) {
   let selectUsers = document.getElementById("user-select");
@@ -25,6 +29,7 @@ function bookmarkSelector() {
   const selectUsers = document.getElementById("user-select");
 
   selectUsers.addEventListener("change", (event) => {
+    currentUser = event.target.value;
     const bookmarkCard = document.getElementById("bookmark-list");
 
     bookmarkCard.innerHTML = null;
@@ -80,16 +85,95 @@ function bookmarkSelector() {
         timestamp.innerHTML = new Date(
           bookmarkData[i].timestamp,
         ).toLocaleString();
+        //like button wired to incrementlikes + persist
+        const bookmarkId = bookmarkData[i].id;
         likeBtn.textContent = `${bookmarkData[i].likes} Likes`;
+        likeBtn.setAttribute("aria-label", `Like ${bookmarkData[i].title}, current likes: ${bookmarkData[i].likes}`);
+        likeBtn.addEventListener("click", () => {
+          let all = getData(currentUser) || [];
+          all = incrementLikes(all, bookmarkId);
+          setData(currentUser, all);
+          selectUsers.dispatchEvent(new Event("change"));
+        });
+        // conpy button
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "Copy URL";
+        copyBtn.classList.add("copyBtn");
+        copyBtn.setAttribute("aria-label", `Copy URL for ${bookmarkData[i].title}`);
+        copyBtn.addEventListener("click", async () => {
+          await copyToClipboard(bookmarkData[i].url);
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => (copyBtn.textContent = "Copy URL"), 2000);
+        });
 
         //Appending all HTML elements containing bookmark data of the user to the div tag
-        bookmarkCard.append(url, description, timestamp, likeBtn, hrTag);
+        bookmarkCard.append(url, description, timestamp, likeBtn, copyBtn, hrTag);
       }
     } catch (err) {
       bookmarkCard.textContent = "This user has no bookmarks";
     }
   });
 }
+
+let bookList = [];
+const title = document.getElementById("title");
+const url = document.getElementById("url");
+const description = document.getElementById("description");
+
+window.submit = function () {
+  if (
+    title.value == null ||
+    url.value == "" ||
+    description.value == null ||
+    description.value == ""
+  ) {
+    alert("Please fill all fields!");
+    return false;
+  } else {
+    try {
+      new URL(url.value);
+    } catch (e) {
+      alert("Invalid URL!");
+      return false;
+    }
+
+    if (!currentUser) {
+      alert("Please select a user first!");
+      return false;
+    }
+
+    // load existing bookmarks for this user first
+    try {
+      bookList = getData(currentUser) || [];
+    } catch {
+      bookList = [];
+    }
+
+    let bookmark = new Book(title.value, url.value, description.value);
+    bookList.push(bookmark);
+    setData(currentUser, bookList); // fixed: pass currentUser
+
+    // clear inputs
+    title.value = "";
+    url.value = "";
+    description.value = "";
+
+    // refresh display by re-triggering Diksha's change event
+    document
+      .getElementById("user-select")
+      .dispatchEvent(new Event("change"));
+  }
+};
+
+function Book(titleVal, urlVal, descriptionVal) {
+  this.id = crypto.randomUUID();          // needed for likes
+  this.title = titleVal;
+  this.url = urlVal;
+  this.description = descriptionVal;
+  this.timestamp = Date.now();            // number so Diksha's sort works
+  this.likes = 0;
+}
+
 
 window.onload = function () {
   const users = getUserIds();
