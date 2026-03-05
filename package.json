@@ -1,0 +1,23 @@
+{
+  "name": "project-shared-bookmarks",
+  "version": "1.0.0",
+  "description": "Welcome to the Piscine! This repo contains the projects required to complete the Piscine module.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fang-dvl/Project-shared-bookmarks.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fang-dvl/Project-shared-bookmarks/issues"
+  },
+  "homepage": "https://github.com/fang-dvl/Project-shared-bookmarks#readme",
+  "devDependencies": {
+    "jest": "^30.2.0"
+  }
+}
